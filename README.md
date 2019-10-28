@@ -6,13 +6,14 @@ This problem seems more common in developers who work with the JVM, than those w
 
 In this blog post I will cover the JVM's numeric types from the ground up, and as a bonus cover a few of those JVM specific quirks too.
 
-## The common confusions
+## The TL;DR; summary
 
 If you want the TL;DR; version of this article:
 
 Common confusions:
   * Integers don't have a sign bit, they use two's complement
   * Floats & doubles are not decimal types
+  * Floats & doubles do have a sign bit
   * Floating point arithmetic can be error free
   * BigDecimal doesn't solve all your problems
   
@@ -34,7 +35,7 @@ These days binary arithmetic is covered in [GCSE computing](https://www.aqa.org.
 
 ### Number bases
 
-Our conception of numbers has varied throughout time and between cultures. Many of us have heard of [Roman Numerals](https://en.wikipedia.org/wiki/Roman_numerals). We are indirectly familiar with [sexagesimal - base 60](https://en.wikipedia.org/wiki/Sexagesimal) numbers, because of the legacy they have left on our measurement of angles and time. Our main education has used the [Arabic-Hindu - base 10](https://en.wikipedia.org/wiki/Hindu%E2%80%93Arabic_numeral_system) number system. That base 10 system has thrived because it includes the concept of [zero](https://en.wikipedia.org/wiki/0), and because most of us have 10 fingers.
+Our conception of numbers has varied throughout time and between cultures. Many of us have heard of [Roman Numerals](https://en.wikipedia.org/wiki/Roman_numerals). We are indirectly familiar with [sexagesimal - base 60](https://en.wikipedia.org/wiki/Sexagesimal) numbers, because of the legacy they have left on our measurement of angles and time. At school we are taught the [Arabic-Hindu - base 10](https://en.wikipedia.org/wiki/Hindu%E2%80%93Arabic_numeral_system) number system. That base 10 system has thrived because it includes the concept of [zero](https://en.wikipedia.org/wiki/0), and because most of us have 10 fingers.
 
 Computers are digital electronic systems, based around the bit. A bit can be a 0 or a 1. Computers use a [binary](https://en.wikipedia.org/wiki/Binary_number) number system, i.e. one with a base of 2.
 
@@ -58,9 +59,10 @@ How do you represent a signed number?
 
 The obvious way to do so is to use 1 bit to represent the sign e.g.:
 
-| Minus | Fours | Twos | Ones | Total in Decimal                                 |
-|:------:|:-----:|:----:|:----:|:------------------------------------------------|
-|       1|      0|     1|     1| (1 x -1) X ((0 x 4) + (1 x 2) + (1 x 1)) = **-3**|
+| Minus | Fours | Twos | Ones | Total in Decimal                           |
+|:-----:|:-----:|:----:|:----:|:-------------------------------------------|
+|      -|      0|    1|      1| -1 X ((0 x 4) + (1 x 2) + (1 x 1)) = **-3**|
+|      +|      0|     1|     1| 1 X ((0 x 4) + (1 x 2) + (1 x 1)) = **3**  |
 
 Despite this being a common belief, this is not the case. Java, like most languages and the hardware we use, use a system called [two's complement](https://en.wikipedia.org/wiki/Two%27s_complement). I won't explain it here, the wikipedia article does a good enough job. If you find this interesting, you might also want to investigate [Gray code](https://en.wikipedia.org/wiki/Gray_code), another way to represent binary numbers that has uses in hardware and error correction codes.
 
@@ -102,7 +104,13 @@ binary representation = 00000000000000000000000000000001, signed int value = 1, 
 binary representation = 00000000000000000000000000000010, signed int value = 2, unsigned int value = 2
 ```
 
-#JVM specific
+#JVM specific quirks
+
+## Java has two shift operators
+
+The right shift operator is often used as a quick way to divide by 2. Moving the digits of a signed number to the right reduces the value each contributes by a factor of 2. To make this useful property hold for signed numbers too, you need to fill the left hand side of the number with the left most column's value before you shift. This type of shift is the ">>" shift operator. I.e. if you start with the integer 11111111111111111111111111100000 i.e. -32 and you do -32 >> 1, you end up with 11111111111111111111111111110000 or -16. Whereas 32 (00000000000000000000000000100000) shifted once to the right will yield 16 (00000000000000000000000000010000).
+
+The second right shift operator that Java has is ">>>" and that will always fill the left hand side with 0s. 32 >>> 1 is 2147483632 (01111111111111111111111111110000). This type of shift is more useful in applications where you are using the the integer to represent a [bitmask](https://en.wikipedia.org/wiki/Mask_%28computing%29)).
 
 Problems specific to java - problems from that java float is broken paper
 

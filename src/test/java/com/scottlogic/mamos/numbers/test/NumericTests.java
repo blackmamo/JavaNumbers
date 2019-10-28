@@ -42,6 +42,16 @@ public class NumericTests {
   }
 
   @Test
+  public void printShift(){
+    out.println(toBits(-32));
+    out.println(toBits(-32 >> 1));
+    out.println(toBits(32));
+    out.println(toBits(32 >> 1));
+    out.println((-32 >>> 1));
+    out.println(toBits(-32 >>> 1));
+  }
+
+  @Test
   public void printNaNAsInt(){
     out.println(toBits(Double.NEGATIVE_INFINITY));
     out.println(toBits(Double.NEGATIVE_INFINITY + 1));
@@ -57,5 +67,9 @@ public class NumericTests {
 
   private static String toBits(double d) {
     return String.format("%64s", Long.toBinaryString(Double.doubleToRawLongBits(d))).replace(' ','0');
+  }
+
+  private static String toBits(int i) {
+    return String.format("%32s", Integer.toBinaryString(i)).replace(' ','0');
   }
 }
