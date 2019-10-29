@@ -14,15 +14,8 @@ import org.junit.jupiter.params.provider.ValueSource;
 
 public class NumericTests {
 
-  public static Integer box(int i){
-    return i;
-  }
 
-  @ParameterizedTest
-  @ValueSource(ints = {12345, 128, 127, 0})
-  public void testBoxCompare(int i){
-    assertTrue(box(i) == box(i), () -> "Failed equality check for "+i);
-  }
+
 
   @ParameterizedTest
   @MethodSource("comparisons")
